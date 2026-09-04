@@ -19,13 +19,13 @@
 
     <section class="card" id="config-card">
       <h2>認証PoC</h2>
-      <p>Clerk の Publishable Key を設定すると、パスワード／Passkey の実機確認を開始できます。</p>
+      <p>Clerk の Publishable Key を設定すると、社員番号＋パスワード認証の実機確認を開始できます。</p>
       <label class="field">
         <span>Clerk Publishable Key</span>
         <input id="publishable-key" autocomplete="off" placeholder="pk_test_..." />
       </label>
       <button id="save-key" class="primary">設定して開始</button>
-      <p class="hint">キーはこの端末の localStorage にだけ保存します。Secret Key は絶対に入力しません。</p>
+      <p class="hint">Secret Key は絶対に入力しません。</p>
     </section>
 
     <section class="card hidden" id="auth-card">
@@ -43,8 +43,7 @@
       <h2>ログイン成功</h2>
       <dl class="summary">
         <div><dt>Clerk User ID</dt><dd id="user-id">-</dd></div>
-        <div><dt>社員番号候補</dt><dd id="username">-</dd></div>
-        <div><dt>Passkey</dt><dd id="passkey-state">Clerk のアカウント設定で登録確認</dd></div>
+        <div><dt>社員番号</dt><dd id="username">-</dd></div>
       </dl>
       <div class="actions">
         <button id="open-profile" class="secondary">認証情報を管理</button>
@@ -55,11 +54,9 @@
     <section class="card note">
       <h2>このPoCで確認すること</h2>
       <ol>
-        <li>社員番号（username）＋パスワードでログインできる</li>
-        <li>Passkey を登録できる</li>
-        <li>iPhone の Face ID / Touch ID で再ログインできる</li>
-        <li>Android の端末認証で再ログインできる</li>
-        <li>Passkey が使えなくてもパスワードで復旧できる</li>
+        <li>社員番号＋パスワードでログインできる</li>
+        <li>ログイン状態を安全に維持できる</li>
+        <li>ログアウト後に社員番号＋パスワードで再ログインできる</li>
       </ol>
     </section>
   </main>
