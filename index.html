@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>血圧記録 - 認証PoC</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">WORKS</p>
+        <h1>血圧記録</h1>
+      </div>
+      <span class="badge">Phase 0</span>
+    </header>
+
+    <section class="card" id="config-card">
+      <h2>認証PoC</h2>
+      <p>Clerk の Publishable Key を設定すると、パスワード／Passkey の実機確認を開始できます。</p>
+      <label class="field">
+        <span>Clerk Publishable Key</span>
+        <input id="publishable-key" autocomplete="off" placeholder="pk_test_..." />
+      </label>
+      <button id="save-key" class="primary">設定して開始</button>
+      <p class="hint">キーはこの端末の localStorage にだけ保存します。Secret Key は絶対に入力しません。</p>
+    </section>
+
+    <section class="card hidden" id="auth-card">
+      <div class="status-row">
+        <div>
+          <span class="status-label">認証状態</span>
+          <strong id="auth-status">未確認</strong>
+        </div>
+        <button id="clear-key" class="text-button">設定解除</button>
+      </div>
+      <div id="clerk-auth"></div>
+    </section>
+
+    <section class="card hidden" id="signed-in-card">
+      <h2>ログイン成功</h2>
+      <dl class="summary">
+        <div><dt>Clerk User ID</dt><dd id="user-id">-</dd></div>
+        <div><dt>社員番号候補</dt><dd id="username">-</dd></div>
+        <div><dt>Passkey</dt><dd id="passkey-state">Clerk のアカウント設定で登録確認</dd></div>
+      </dl>
+      <div class="actions">
+        <button id="open-profile" class="secondary">認証情報を管理</button>
+        <button id="sign-out" class="danger">ログアウト</button>
+      </div>
+    </section>
+
+    <section class="card note">
+      <h2>このPoCで確認すること</h2>
+      <ol>
+        <li>社員番号（username）＋パスワードでログインできる</li>
+        <li>Passkey を登録できる</li>
+        <li>iPhone の Face ID / Touch ID で再ログインできる</li>
+        <li>Android の端末認証で再ログインできる</li>
+        <li>Passkey が使えなくてもパスワードで復旧できる</li>
+      </ol>
+    </section>
+  </main>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
