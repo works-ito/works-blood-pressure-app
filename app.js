@@ -13,7 +13,10 @@ const PUBLISHABLE_KEY = 'pk_test_Y29oZXJlbnQtaGFsaWJ1dC03MTIuY2xlcmsuYWNjb3VudHM
 let clerk = null;
 
 async function loadClerk(publishableKey) {
-  const { Clerk } = await import('https://esm.sh/@clerk/clerk-js@latest');
+  const [{ Clerk }, { jaJP }] = await Promise.all([
+    import('https://esm.sh/@clerk/clerk-js@latest'),
+    import('https://esm.sh/@clerk/localizations@latest'),
+  ]);
 
   const encodedDomain = publishableKey.split('_')[2];
   if (!encodedDomain) throw new Error('Invalid Clerk publishable key');
@@ -38,6 +41,7 @@ async function loadClerk(publishableKey) {
   clerk = new Clerk(publishableKey);
   await clerk.load({
     ui: { ClerkUI: window.__internal_ClerkUICtor },
+    localization: jaJP,
   });
 
   return clerk;
