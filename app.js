@@ -11,23 +11,19 @@ const username = document.querySelector('#username');
 const signOutButton = document.querySelector('#sign-out');
 const openProfileButton = document.querySelector('#open-profile');
 
-const STORAGE_KEY = 'works_bp_clerk_publishable_key';
+const PUBLISHABLE_KEY = 'pk_test_Y29oZXJlbnQtaGFsaWJ1dC03MTIuY2xlcmsuYWNjb3VudHMuZGV2JA';
 let clerk = null;
 
-saveKeyButton.addEventListener('click', () => {
+saveKeyButton?.addEventListener('click', () => {
   const key = keyInput.value.trim();
   if (!key.startsWith('pk_')) {
     alert('Publishable Key（pk_...）を入力してください。');
     return;
   }
-  localStorage.setItem(STORAGE_KEY, key);
   location.reload();
 });
 
-clearKeyButton.addEventListener('click', () => {
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-});
+clearKeyButton?.addEventListener('click', () => location.reload());
 
 async function loadClerk(publishableKey) {
   const { Clerk } = await import('https://esm.sh/@clerk/clerk-js@latest');
@@ -70,20 +66,13 @@ openProfileButton.addEventListener('click', () => {
 });
 
 async function boot() {
-  const key = localStorage.getItem(STORAGE_KEY);
-  if (!key) {
-    configCard.classList.remove('hidden');
-    authCard.classList.add('hidden');
-    return;
-  }
-
-  keyInput.value = key;
+  if (keyInput) keyInput.value = PUBLISHABLE_KEY;
   configCard.classList.add('hidden');
   authCard.classList.remove('hidden');
   authStatus.textContent = '初期化中…';
 
   try {
-    await loadClerk(key);
+    await loadClerk(PUBLISHABLE_KEY);
     if (clerk.user) showSignedIn(); else showSignedOut();
 
     clerk.addListener(({ user }) => {
