@@ -1,107 +1,90 @@
-const keyInput = document.querySelector('#publishable-key');
-const configCard = document.querySelector('#config-card');
-const authCard = document.querySelector('#auth-card');
-const signedInCard = document.querySelector('#signed-in-card');
+const AUTH0_DOMAIN = 'dev-7d4p1aok5s6q6ifa.us.auth0.com';
+const AUTH0_CLIENT_ID = 'aKdyIckH1X7nvkSvKeEFxSISb3m6Nkum';
+const REDIRECT_URI = 'https://works-ito.github.io/works-blood-pressure-app/';
+
 const authStatus = document.querySelector('#auth-status');
-const authMount = document.querySelector('#clerk-auth');
+const signedOutView = document.querySelector('#signed-out-view');
+const signedInCard = document.querySelector('#signed-in-card');
+const authError = document.querySelector('#auth-error');
 const userId = document.querySelector('#user-id');
-const username = document.querySelector('#username');
-const signOutButton = document.querySelector('#sign-out');
-const openProfileButton = document.querySelector('#open-profile');
+const userLabel = document.querySelector('#user-label');
+const loginButton = document.querySelector('#login');
+const logoutButton = document.querySelector('#logout');
 
-const PUBLISHABLE_KEY = 'pk_test_Y29oZXJlbnQtaGFsaWJ1dC03MTIuY2xlcmsuYWNjb3VudHMuZGV2JA';
-let clerk = null;
+let auth0Client = null;
 
-async function loadClerk(publishableKey) {
-  const [{ Clerk }, { jaJP }] = await Promise.all([
-    import('https://esm.sh/@clerk/clerk-js@latest'),
-    import('https://esm.sh/@clerk/localizations@latest'),
-  ]);
-
-  const encodedDomain = publishableKey.split('_')[2];
-  if (!encodedDomain) throw new Error('Invalid Clerk publishable key');
-
-  const clerkDomain = atob(encodedDomain).slice(0, -1);
-
-  await new Promise((resolve, reject) => {
-    if (window.__internal_ClerkUICtor) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = `https://${clerkDomain}/npm/@clerk/ui@1/dist/ui.browser.js`;
-    script.async = true;
-    script.crossOrigin = 'anonymous';
-    script.onload = resolve;
-    script.onerror = () => reject(new Error('Clerk UI bundle failed to load'));
-    document.head.appendChild(script);
-  });
-
-  clerk = new Clerk(publishableKey);
-  await clerk.load({
-    ui: { ClerkUI: window.__internal_ClerkUICtor },
-    localization: jaJP,
-  });
-
-  return clerk;
+function showError(error) {
+  console.error(error);
+  authStatus.textContent = '認証エラー';
+  authError.classList.remove('hidden');
+  authError.innerHTML = `<p>Auth0 の認証処理でエラーが発生しました。</p><p class="hint">${String(error?.message || error)}</p>`;
 }
 
-function showSignedOut() {
-  authStatus.textContent = '未ログイン';
-  signedInCard.classList.add('hidden');
-  authMount.innerHTML = '';
+function clearError() {
+  authError.classList.add('hidden');
+  authError.innerHTML = '';
+}
 
-  clerk.mountSignIn(authMount, {
-    appearance: {
-      elements: {
-        rootBox: { width: '100%' },
-        cardBox: { width: '100%', boxShadow: 'none' },
-        card: { width: '100%', boxShadow: 'none', padding: '0' },
-      },
+async function renderAuthState() {
+  const authenticated = await auth0Client.isAuthenticated();
+
+  if (!authenticated) {
+    authStatus.textContent = '未ログイン';
+    signedOutView.classList.remove('hidden');
+    signedInCard.classList.add('hidden');
+    return;
+  }
+
+  const user = await auth0Client.getUser();
+  authStatus.textContent = 'ログイン済み';
+  signedOutView.classList.add('hidden');
+  signedInCard.classList.remove('hidden');
+
+  userId.textContent = user?.sub ?? '-';
+  userLabel.textContent = user?.username ?? user?.nickname ?? user?.name ?? user?.email ?? '認証済み';
+}
+
+loginButton.addEventListener('click', async () => {
+  if (!auth0Client) return;
+  clearError();
+  await auth0Client.loginWithRedirect({
+    authorizationParams: {
+      redirect_uri: REDIRECT_URI,
     },
   });
-}
-
-function showSignedIn() {
-  authStatus.textContent = 'ログイン済み';
-  signedInCard.classList.remove('hidden');
-  userId.textContent = clerk.user?.id ?? '-';
-  username.textContent = clerk.user?.username ?? '未設定';
-  authMount.innerHTML = '<p class="hint">認証済みです。Phase 0では社員番号＋パスワード認証を確認します。</p>';
-}
-
-signOutButton.addEventListener('click', async () => {
-  if (!clerk) return;
-  await clerk.signOut();
-  showSignedOut();
 });
 
-openProfileButton.addEventListener('click', () => {
-  if (!clerk) return;
-  clerk.openUserProfile();
+logoutButton.addEventListener('click', async () => {
+  if (!auth0Client) return;
+  await auth0Client.logout({
+    logoutParams: {
+      returnTo: REDIRECT_URI,
+    },
+  });
 });
 
 async function boot() {
-  if (keyInput) keyInput.value = PUBLISHABLE_KEY;
-  configCard.classList.add('hidden');
-  authCard.classList.remove('hidden');
-  authStatus.textContent = '初期化中…';
-
   try {
-    await loadClerk(PUBLISHABLE_KEY);
+    clearError();
+    authStatus.textContent = '初期化中…';
 
-    if (clerk.user) showSignedIn();
-    else showSignedOut();
-
-    clerk.addListener(({ user }) => {
-      if (user) showSignedIn();
-      else showSignedOut();
+    auth0Client = await auth0.createAuth0Client({
+      domain: AUTH0_DOMAIN,
+      clientId: AUTH0_CLIENT_ID,
+      authorizationParams: {
+        redirect_uri: REDIRECT_URI,
+      },
     });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('code') && params.has('state')) {
+      await auth0Client.handleRedirectCallback();
+      window.history.replaceState({}, document.title, REDIRECT_URI);
+    }
+
+    await renderAuthState();
   } catch (error) {
-    console.error(error);
-    authStatus.textContent = '初期化エラー';
-    authMount.innerHTML = `<p>Clerk の初期化に失敗しました。</p><p class="hint">${String(error?.message || error)}</p>`;
+    showError(error);
   }
 }
 
