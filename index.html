@@ -17,50 +17,47 @@
       <span class="badge">Phase 0</span>
     </header>
 
-    <section class="card" id="config-card">
-      <h2>認証PoC</h2>
-      <p>Clerk の Publishable Key を設定すると、社員番号＋パスワード認証の実機確認を開始できます。</p>
-      <label class="field">
-        <span>Clerk Publishable Key</span>
-        <input id="publishable-key" autocomplete="off" placeholder="pk_test_..." />
-      </label>
-      <button id="save-key" class="primary">設定して開始</button>
-      <p class="hint">Secret Key は絶対に入力しません。</p>
-    </section>
-
-    <section class="card hidden" id="auth-card">
+    <section class="card" id="auth-card">
       <div class="status-row">
         <div>
           <span class="status-label">認証状態</span>
-          <strong id="auth-status">未確認</strong>
+          <strong id="auth-status">初期化中…</strong>
         </div>
-        <button id="clear-key" class="text-button">設定解除</button>
       </div>
-      <div id="clerk-auth"></div>
+
+      <div id="signed-out-view" class="hidden">
+        <p>社員認証を行います。Auth0 のログイン画面へ進みます。</p>
+        <button id="login" class="primary">ログイン</button>
+        <p class="hint">Phase 0では、パスワードとPasskeyの両方でログインできることを確認します。</p>
+      </div>
+
+      <div id="auth-error" class="hidden"></div>
     </section>
 
     <section class="card hidden" id="signed-in-card">
       <h2>ログイン成功</h2>
       <dl class="summary">
-        <div><dt>Clerk User ID</dt><dd id="user-id">-</dd></div>
-        <div><dt>社員番号</dt><dd id="username">-</dd></div>
+        <div><dt>Auth0 User ID</dt><dd id="user-id">-</dd></div>
+        <div><dt>認証ユーザー</dt><dd id="user-label">-</dd></div>
       </dl>
       <div class="actions">
-        <button id="open-profile" class="secondary">認証情報を管理</button>
-        <button id="sign-out" class="danger">ログアウト</button>
+        <button id="logout" class="danger">ログアウト</button>
       </div>
     </section>
 
     <section class="card note">
       <h2>このPoCで確認すること</h2>
       <ol>
-        <li>社員番号＋パスワードでログインできる</li>
-        <li>ログイン状態を安全に維持できる</li>
-        <li>ログアウト後に社員番号＋パスワードで再ログインできる</li>
+        <li>パスワードでログインできる</li>
+        <li>Passkeyを登録できる</li>
+        <li>iPhoneでFace ID等の端末認証による再ログインができる</li>
+        <li>Androidで端末認証による再ログインができる</li>
+        <li>Passkeyを使えない場合でもパスワードで復旧できる</li>
       </ol>
     </section>
   </main>
 
-  <script src="app.js" type="module"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.24/auth0-spa-js.production.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
