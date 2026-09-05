@@ -50,6 +50,7 @@ loginButton.addEventListener('click', async () => {
   await auth0Client.loginWithRedirect({
     authorizationParams: {
       redirect_uri: REDIRECT_URI,
+      ui_locales: 'ja',
     },
   });
 });
@@ -73,6 +74,7 @@ async function boot() {
       clientId: AUTH0_CLIENT_ID,
       authorizationParams: {
         redirect_uri: REDIRECT_URI,
+        ui_locales: 'ja',
       },
     });
 
